@@ -18,10 +18,9 @@ class Server:
         self.loadCards()
 
     def retrieveData(self, TID, CID):
-        print("Retrived card {} from terminal {}".format(CID, TID))
+        print("Retrieved card {} from terminal {}".format(CID, TID))
         if self.listOfTerminals.__contains__(TID):
-            print(TID, CID)
-            self.c.execute("SELECT * FROM cards WHERE CID='{}'".format(CID))
+            self.c.execute("SELECT * FROM cards WHERE CID='{}' AND isRegistered = 1".format(CID))
             cardQuery = self.c.fetchone()
             if cardQuery is not None:
                 self.c.execute("SELECT EID FROM bindings WHERE CID='{}'".format(CID))
@@ -39,30 +38,35 @@ class Server:
                     self.logUnbindedCardScan(CID, TID)
             else:
                 print("Registering new card")
-                self.registerUnknownCard()
+                self.registerUnknownCard(CID, TID)
         else:
             print(Constants.TERMINAL_NOT_REGISTERED)
 
     def loadTerminals(self):
-        self.c.execute("SELECT TID FROM terminals")
+        self.listOfTerminals.clear()
+        self.c.execute("SELECT TID FROM terminals WHERE isRegistered = '1'")
         lot = self.c.fetchall()
         for terminal in lot:
             self.listOfTerminals.append(terminal[0])
         print("Loaded terminals")
 
     def loadCards(self):
-        self.c.execute("SELECT CID FROM cards")
+        self.listOfCards.clear()
+        self.c.execute("SELECT CID FROM cards WHERE isRegistered = 1")
         cards = self.c.fetchall()
         for card in cards:
             self.listOfCards.append(card[0])
+        print("Loaded cards")
 
-    def registerTerminal(self, TID, address):
-        self.c.execute("INSERT INTO terminals VALUES ('{}', '{}')".format(TID, address))
+    def registerTerminal(self, TID):
+        self.c.execute("UPDATE terminals SET isRegistered = '1' WHERE TID = '{}'".format(TID))
         self.conn.commit()
+        self.loadTerminals()
 
     def unregisterTerminal(self, TID):
-        self.c.execute("DELETE FROM terminals WHERE TID='{}'".format(TID))
+        self.c.execute("UPDATE terminals SET isRegistered = '0' WHERE TID = '{}'".format(TID))
         self.conn.commit()
+        self.loadTerminals()
 
     def getEmployeeById(self, EID):
         self.c.execute("SELECT * FROM employees WHERE ID='{}'".format(EID))
@@ -80,9 +84,12 @@ class Server:
         self.checkedInEmployees.remove(EID)
 
     def registerUnknownCard(self, CID, TID):
-        self.c.execute("INSERT INTO logs VALUES ('{}', '{}', '{}', '{}')"
+        self.c.execute("UPDATE cards SET isRegistered = '1' WHERE CID = '{}'".format(CID))
+        self.conn.commit()
+        self.c.execute("INSERT INTO logs VALUES ('{}', '{}', '{}', '{}', '{}')"
                        .format(CID, TID, None, Constants.Action.unknown, datetime.datetime.now()))
         self.conn.commit()
+        self.loadCards()
 
     def logUnbindedCardScan(self, CID, TID):
         self.c.execute("INSERT INTO logs VALUES ('{}', '{}', '{}', '{}', '{}')"
@@ -95,18 +102,19 @@ class Server:
         if query is None:
             self.c.execute("INSERT INTO bindings VALUES ('{}', '{}')".format(EID, CID))
             self.conn.commit()
-            print("Binded card to employee".format(CID, EID))
+            print("Binded card {} to employee {}".format(CID, EID))
         else:
             print("Card already binded")
 
-    def unbindCardFromEmployee(self, CID, EID):
-        self.c.execute("SELECT * FROM bindings WHERE CID='{}' AND EID='{}'".format(CID, EID))
+    def unbindCardFromEmployee(self, CID):
+        self.c.execute("SELECT * FROM bindings WHERE CID='{}'".format(CID))
         query = self.c.fetchone()
         if query is not None:
             self.c.execute("DELETE FROM bindings WHERE CID='{}'".format(CID))
+            self.conn.commit()
             print("Card unbinded")
         else:
-            print("Card {} and employee {} are not binded".format(CID, EID))
+            print("Card {} is not binded".format(CID))
 
     def generateReport(self, EID):
         self.c.execute("SELECT datetime FROM logs WHERE EID='{}' AND action='{}'".format(EID, Constants.Action.checkIn))
@@ -138,6 +146,7 @@ class Server:
             writer.writerow([])
             writer.writerow(["","Hours","Minutes","Seconds"])
             writer.writerow(["Total time of work:", time[0], time[1], time[2]])
+        print("Created report {} in reports folder".format(EID))
 
     def convertSecondsToTime(self, totalSeconds):
         hours = divmod(totalSeconds, 3600)

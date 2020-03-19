@@ -1,68 +1,158 @@
-def startMenu():
-    currentCard = 0
-    currentEmployee = 0
-    currentTerminal = 0
-    running = True
+import sys
 
-    def dropDB():  # drops database
-        from init import dropDB
-        dropDB()
 
-    def showCard():  # shows current card
-        print(currentCard)
+class Menu:
+    currentCard = None
+    currentEmployee = None
+    currentTerminal = None
+    listOfCommands = []
 
-    def showEmp():  # shows current employee
-        from init import ms
-        emp = ms.getEmployeeById(currentEmployee)
-        print(emp.toString())
+    def dropDB(self):  # drops database
+        from main import ms, server, listOfTerminals, listOfCards
+        isDropped = ms.dropDB()
+        if isDropped:
+            ms.initDB()
+            server.__init__()
+            listOfTerminals.clear()
+            listOfCards.clear()
+            self.currentCard = None
+            self.currentTerminal = None
+            self.currentEmployee = None
 
-    def showTerm(): # shows current terminal
-        print(currentTerminal)
+    def shc(self):  # shows current card
+        print(self.currentCard)
 
-    def chCard(x):  # changes current card to x in list of cards
-        from init import server
-        from init import ms
-        if x < 0 or x >= len(server.listOfCards):
+    def she(self):  # shows current employee
+        from main import ms
+        if self.currentEmployee is not None:
+            emp = ms.getEmployeeById(self.currentEmployee)
+            print(emp.toString())
+        else:
+            print(None)
+
+    def sht(self, ):  # shows current terminal
+        if self.currentTerminal is not None:
+            print(self.currentTerminal.toString())
+        else:
+            print(None)
+
+    def shemps(self):  # shows all employees
+        from main import ms
+        ms.printAllEmployees()
+
+    def shcards(self):  # shows all cards
+        from main import ms
+        ms.printCards()
+
+    def shterms(self):  # shows all terminals
+        from main import ms
+        ms.printAllTerminals()
+
+    def shrcards(self):  # shwos all registered cards
+        from main import server
+        for card in server.listOfCards:
+            print(card)
+
+    def shrterms(self):  # shows all registered terminals
+        from main import server
+        for term in server.listOfTerminals:
+            print(term)
+
+    def shLogs(self):  # shows all logs
+        from main import ms
+        ms.printLogs()
+
+    def chc(self, x):  # changes current card to x in list of cards
+        from main import ms
+        from main import listOfCards
+        if x < 0 or x >= len(listOfCards):
             print("Desired card is not available\n Available cards:")
             ms.printCards()
             return
-        currentCard = server.listOfCards[x]
+        self.currentCard = listOfCards[x]
+        print("Changed current card to")
 
-    def chEmp(x):  # changes current Employee to x in list of employees
-        from init import ms
+        self.shc()
+
+    def che(self, x):  # changes current Employee to x in list of employees
+        from main import ms
         emps = ms.getAllEmployees()
         if x < 0 or x >= len(emps):
             print("Desired employee is not available\n Available employees:")
             ms.printAllEmployees()
             return
-        currentEmployee = emps[x][0]
+        self.currentEmployee = emps[x][0]
+        emp = ms.getEmployeeById(self.currentEmployee)
+        print("Changed current employee to")
+        self.she()
 
-    def chTerm(x): # change current Terminal
-        from init import clientList
-        if x < 0 or x >= len(clientList):
+    def cht(self, x):  # changes current Terminal to x in list of terminals
+        from main import listOfTerminals
+        if x < 0 or x >= len(listOfTerminals):
             print("Desired terminal is not available\n Available terminals:")
-            print(clientList)
+            for term in listOfTerminals:
+                print(term.toString())
             return
-        currentTerminal = clientList[x]
+        self.currentTerminal = listOfTerminals[x]
+        print("Changed current terminal to")
+        self.sht()
 
+    def btu(self):  # binds current card to user
+        from main import server
+        if self.currentEmployee is not None and self.currentCard is not None:
+            server.bindCardToEmployee(self.currentCard, self.currentEmployee)
+        else:
+            print("Cannot bind card {} to employee {}".format(self.currentCard, self.currentEmployee))
 
-    def btu():  # binds current card to user
-        from init import server
-        server.bindCardToEmployee(currentCard, currentEmployee)
+    def ubtu(self):  # unbinds current card from user
+        from main import server
+        if self.currentCard is not None:
+            server.unbindCardFromEmployee(self.currentCard)
+        else:
+            print("Cannot unbind card {}".format(self.currentCard))
 
-    def scan():  # scan current card
-        from Terminal import Terminal
-        curTerm : Terminal = currentTerminal
-        curTerm.scanCard(currentCard)
+    def rt(self):  # registers current terminal on server
+        from main import server
+        if self.currentTerminal is not None:
+            server.registerTerminal(self.currentTerminal.TID)
+            print("Registered terminal")
+        else:
+            print("Current terminal is not valid")
 
-    def exit(): # exits app
-        running = False
+    def urt(self):  # unregisters current terminal from server
+        from main import server
+        if self.currentTerminal is not None:
+            server.unregisterTerminal(self.currentTerminal.TID)
+            print("Unregistered terminal")
+        else:
+            print("Current terminal is not valid")
 
-    chCard(0)
-    chEmp(0)
-    chTerm(0)
+    def scan(self):  # scan current card
+        if self.currentCard is not None:
+            self.currentTerminal.scanCard(self.currentCard)
+        else:
+            print("Current card is not valid")
 
-    while running:
-        comm = input("> ")
-        exec(comm)
-        print(running) #mf is diffrent than global ig
+    def report(self):  # creates report fot current employee
+        from main import server
+        if self.currentEmployee is not None:
+            server.generateReport(self.currentEmployee)
+        else:
+            print("Current employee is not valid")
+
+    def exit(self):  # exits app
+        sys.exit()
+
+    def start(self):
+        self.chc(0)
+        self.che(0)
+        self.cht(0)
+
+        while True:
+            comm = input("> ")
+            try:
+                exec("self." + comm)
+            except SystemExit:
+                sys.exit()
+          #  except:
+#                print("Unknown command")

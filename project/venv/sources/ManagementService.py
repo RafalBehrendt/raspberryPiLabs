@@ -2,24 +2,33 @@ import uuid
 import sqlite3
 from Employee import Employee
 from Terminal import Terminal
+from DBManage import *
+
 
 class ManagementService:
     conn = sqlite3.connect('../database/company.db')
     c = conn.cursor()
 
     def createEmployee(self, name, surname):
-        self.c.execute("INSERT INTO employees VALUES ('{}', '{}', '{}')".format(uuid.uuid1(), name, surname))
+        generatedUUID = uuid.uuid1()
+        self.c.execute("INSERT INTO employees VALUES ('{}', '{}', '{}')".format(generatedUUID, name, surname))
         self.conn.commit()
 
     def createCard(self):
-        self.c.execute("INSERT INTO cards VALUES ('{}')".format(uuid.uuid1()))
+        generatedUUID = uuid.uuid1()
+        self.c.execute("INSERT INTO cards VALUES ('{}', '0')".format(generatedUUID))
+        self.conn.commit()
+        return generatedUUID
+
+    def registerCard(self, CID):
+        self.c.execute("UPDATE cards SET isRegistered = 1 WHERE CID = '{}'".format(CID))
         self.conn.commit()
 
-    def createTerminal(self, address, server):
-        generatedUID = uuid.uuid1()
-        self.c.execute("INSERT INTO terminals VALUES ('{}', '{}')".format(generatedUID, address))
+    def createTerminal(self, address):
+        generatedUUID = uuid.uuid1()
+        self.c.execute("INSERT INTO terminals VALUES ('{}', '{}', '0')".format(generatedUUID, address))
         self.conn.commit()
-        return Terminal(generatedUID, address, server)
+        return Terminal(generatedUUID, address)
 
     def getAllEmployees(self):
         self.c.execute("SELECT * FROM employees")
@@ -33,6 +42,10 @@ class ManagementService:
         self.c.execute("SELECT * FROM cards")
         return self.c.fetchall()
 
+    def getAllTerminals(self):
+        self.c.execute("SELECT * FROM terminals")
+        return self.c.fetchall()
+
     def getLogs(self):
         self.c.execute("SELECT * FROM logs")
         return self.c.fetchall()
@@ -41,7 +54,9 @@ class ManagementService:
         logs = self.getLogs()
         inc = 0
         for log in logs:
-            print("{}: CardID: {} ; TerminalID: {} ; EmployeeID: {} ; Action: {} ; Date: {}".format(inc, log[0], log[1], log[2], log[3], log[4]))
+            print("{}: CardID: {} ; TerminalID: {} ; EmployeeID: {} ; Action: {} ; Date: {}".format(inc, log[0], log[1],
+                                                                                                    log[2], log[3],
+                                                                                                    log[4]))
             inc += 1
         inc = 0
 
@@ -58,6 +73,14 @@ class ManagementService:
         inc = 0
         for emp in employees:
             print("{}: EmployeeID: {}, Name: {}, Surname: {}".format(inc, emp[0], emp[1], emp[2]))
+            inc += 1
+        inc = 0
+
+    def printAllTerminals(self):
+        terminals = self.getAllTerminals()
+        inc = 0
+        for term in terminals:
+            print("{}: TerminalID: {}, Address: {}".format(inc, term[0], term[1]))
             inc += 1
         inc = 0
 
@@ -79,4 +102,34 @@ class ManagementService:
         for card in cards:
             listOfCards.append(card[0])
         return Employee(employee[0], employee[1], employee[2], listOfCards)
+
+    def dropDB(self):
+        res = ""
+        while res != "N" or res != "Y":
+            res = input("You're about to drop whole database and create new one, proceed? [Y/N]: ")
+            if (res == "Y"):
+                resetDB()
+                return True
+            elif (res == "N"):
+                return False
+
+    def initDB(self):
+        initializeDB()
+
+    def mockData(self, server):
+
+        self.createEmployee("Andrzej", "Kowalski")
+        self.createEmployee("Zdzislaw", "Skrzynecki")
+        self.createEmployee("Mariusz", "Pudzianowski")
+        self.createEmployee("Dorian", "Kaczmarczyk")
+
+        for i in range(1, 20):
+            tempCard = self.createCard()
+            tempTerm = self.createTerminal("192.168.0.{}".format(i + 100))
+            if i % 5 == 0:
+                server.registerTerminal(tempTerm.TID)
+                self.registerCard(tempCard)
+
+        server.loadTerminals()
+        server.loadCards()
 

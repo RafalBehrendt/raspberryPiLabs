@@ -25,14 +25,16 @@ def initializeDB():
     conn.commit()
 
     c.execute("""CREATE TABLE IF NOT EXISTS cards (
-    CID text PRIMARY KEY NOT NULL
+        CID text PRIMARY KEY NOT NULL,
+        isRegistered integer
     )""")
 
     conn.commit()
 
     c.execute("""CREATE TABLE IF NOT EXISTS terminals (
         TID text PRIMARY KEY NOT NULL,
-        address text
+        address text,
+        isRegistered integer
     )""")
 
     conn.commit()
@@ -55,3 +57,5 @@ def resetDB():
     c.execute("DROP TABLE IF EXISTS cards")
     c.execute("DROP TABLE IF EXISTS terminals")
     c.execute("DROP TABLE IF EXISTS bindings")
+    c.execute("DROP TABLE IF EXISTS registeredTerminals")
+    initializeDB()

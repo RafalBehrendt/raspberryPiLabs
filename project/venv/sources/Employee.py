@@ -10,7 +10,5 @@ class Employee:
         self.bindedCards = bindedCards
 
     def toString(self):
-        return ("""{} 
-        {} 
-        {} 
-        {}""".format(self.ID, self.name, self.surname, self.bindedCards))
+        return ("EID: {}\nName: {}\nSurname: {}\nbindedCards: {}"
+                .format(self.ID, self.name, self.surname, self.bindedCards))
