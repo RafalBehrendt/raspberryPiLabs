@@ -15,7 +15,7 @@ def initializeDB():
     conn.commit()
 
     c.execute("""CREATE TABLE IF NOT EXISTS logs (
-        CID text NOT NULL,
+        CID text,
         TID text,
         EID text,
         action text,
@@ -25,13 +25,13 @@ def initializeDB():
     conn.commit()
 
     c.execute("""CREATE TABLE IF NOT EXISTS cards (
-    CID text
+    CID text PRIMARY KEY NOT NULL
     )""")
 
     conn.commit()
 
     c.execute("""CREATE TABLE IF NOT EXISTS terminals (
-        TID text,
+        TID text PRIMARY KEY NOT NULL,
         address text
     )""")
 
