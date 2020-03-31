@@ -9,24 +9,16 @@ def initializeDB():
     c.execute("""CREATE TABLE IF NOT EXISTS employees (
         EID text PRIMARY KEY NOT NULL,
         name text,
-        surnmae text
-    )""")
-
-    conn.commit()
-
-    c.execute("""CREATE TABLE IF NOT EXISTS logs (
-        CID text,
-        TID text,
-        EID text,
-        action text,
-        datetime timestamp
+        surname text
     )""")
 
     conn.commit()
 
     c.execute("""CREATE TABLE IF NOT EXISTS cards (
         CID text PRIMARY KEY NOT NULL,
-        isRegistered integer
+        isRegistered integer,
+        EID text,
+        FOREIGN KEY(EID) REFERENCES employees(EID)
     )""")
 
     conn.commit()
@@ -39,9 +31,15 @@ def initializeDB():
 
     conn.commit()
 
-    c.execute("""CREATE TABLE IF NOT EXISTS bindings (
+    c.execute("""CREATE TABLE IF NOT EXISTS logs (
+        CID text,
+        TID text,
         EID text,
-        CID text
+        action text,
+        datetime timestamp,
+        FOREIGN KEY(CID) REFERENCES cards(CID),
+        FOREIGN KEY(TID) REFERENCES terminals(TID),
+        FOREIGN KEY(EID) REFERENCES employees(EID)
     )""")
 
     conn.commit()

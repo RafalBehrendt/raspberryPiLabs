@@ -48,7 +48,7 @@ class Menu:
         from main import ms
         ms.printAllTerminals()
 
-    def shrcards(self):  # shwos all registered cards
+    def shrcards(self):  # shows all registered cards
         from main import server
         for card in server.listOfCards:
             print(card)
@@ -154,5 +154,5 @@ class Menu:
                 exec("self." + comm)
             except SystemExit:
                 sys.exit()
-          #  except:
-#                print("Unknown command")
+            except:
+                print("Unknown command")

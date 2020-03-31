@@ -16,7 +16,7 @@ class ManagementService:
 
     def createCard(self):
         generatedUUID = uuid.uuid1()
-        self.c.execute("INSERT INTO cards VALUES ('{}', '0')".format(generatedUUID))
+        self.c.execute("INSERT INTO cards VALUES ('{}', 0, '{}')".format(generatedUUID, None))
         self.conn.commit()
         return generatedUUID
 
@@ -35,7 +35,7 @@ class ManagementService:
         return self.c.fetchall()
 
     def getAllBindings(self):
-        self.c.execute("SELECT * FROM bindings")
+        self.c.execute("SELECT CID FROM cards WHERE EID IS NOT NULL")
         return self.c.fetchall()
 
     def getAllCards(self):
@@ -96,7 +96,7 @@ class ManagementService:
         if employee is None:
             print("There is no such employee")
             return
-        self.c.execute("SELECT CID FROM bindings WHERE EID='{}'".format(EID))
+        self.c.execute("SELECT CID FROM cards WHERE EID='{}'".format(EID))
         cards = self.c.fetchall()
         listOfCards = []
         for card in cards:

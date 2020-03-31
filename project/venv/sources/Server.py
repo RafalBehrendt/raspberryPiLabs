@@ -23,9 +23,9 @@ class Server:
             self.c.execute("SELECT * FROM cards WHERE CID='{}' AND isRegistered = 1".format(CID))
             cardQuery = self.c.fetchone()
             if cardQuery is not None:
-                self.c.execute("SELECT EID FROM bindings WHERE CID='{}'".format(CID))
+                self.c.execute("SELECT EID FROM cards WHERE CID='{}'".format(CID))
                 employee = self.c.fetchone()
-                if employee is not None:
+                if employee[0] != "None":
                     if self.checkedInEmployees.__contains__(employee[0]):
                         print("Checking employee {} out".format(employee[0]))
                         self.checkOut(TID, CID, employee[0])
@@ -97,20 +97,20 @@ class Server:
         self.conn.commit()
 
     def bindCardToEmployee(self, CID, EID):
-        self.c.execute("SELECT * FROM bindings WHERE CID='{}'".format(CID))
+        self.c.execute("SELECT EID FROM cards WHERE CID='{}'".format(CID))
         query = self.c.fetchone()
-        if query is None:
-            self.c.execute("INSERT INTO bindings VALUES ('{}', '{}')".format(EID, CID))
+        if query[0] == "None":
+            self.c.execute("UPDATE cards SET EID ='{}' WHERE CID ='{}'".format(EID, CID))
             self.conn.commit()
             print("Binded card {} to employee {}".format(CID, EID))
         else:
             print("Card already binded")
 
     def unbindCardFromEmployee(self, CID):
-        self.c.execute("SELECT * FROM bindings WHERE CID='{}'".format(CID))
+        self.c.execute("SELECT EID FROM cards WHERE CID='{}'".format(CID))
         query = self.c.fetchone()
-        if query is not None:
-            self.c.execute("DELETE FROM bindings WHERE CID='{}'".format(CID))
+        if query[0] != "None":
+            self.c.execute("UPDATE cards SET EID='{}' WHERE CID='{}'".format(None, CID))
             self.conn.commit()
             print("Card unbinded")
         else:
@@ -133,19 +133,19 @@ class Server:
                 diffrence = checkOut[0] - checkIn[0]
                 durInSec = diffrence.total_seconds()
                 time = self.convertSecondsToTime(durInSec)
-                writer.writerow([checkIn[0], checkOut[0], time[0], time[1], time[2]])
+                writer.writerow([checkIn[0], checkOut[0], int(time[0]), int(time[1]), int(time[2])])
                 totalTime += durInSec
             if len(employeeCheckIn) > len(employeeCheckOut):
                 lastCheckInLog = employeeCheckIn[-1]
                 diffrence = datetime.datetime.now() - lastCheckInLog[0]
                 durInSec = diffrence.total_seconds()
                 time = self.convertSecondsToTime(durInSec)
-                writer.writerow([lastCheckInLog[0], "Still in work", time[0], time[1], time[2]])
+                writer.writerow([lastCheckInLog[0], "Still in work", int(time[0]), int(time[1]), int(time[2])])
                 totalTime += durInSec
             time = self.convertSecondsToTime(totalTime)
             writer.writerow([])
             writer.writerow(["","Hours","Minutes","Seconds"])
-            writer.writerow(["Total time of work:", time[0], time[1], time[2]])
+            writer.writerow(["Total time of work:", int(time[0]), int(time[1]), int(time[2])])
         print("Created report {} in reports folder".format(EID))
 
     def convertSecondsToTime(self, totalSeconds):
