@@ -30,6 +30,10 @@ class ManagementService:
         self.conn.commit()
         return Terminal(generatedUUID, address)
 
+    def createTerminal(self, address, TID):
+        self.c.execute("INSERT INTO terminals VALUES ('{}', '{}', '0')".format(TID, address))
+        self.conn.commit()
+
     def getAllEmployees(self):
         self.c.execute("SELECT * FROM employees")
         return self.c.fetchall()
@@ -123,12 +127,9 @@ class ManagementService:
         self.createEmployee("Mariusz", "Pudzianowski")
         self.createEmployee("Dorian", "Kaczmarczyk")
 
-        for i in range(1, 20):
-            tempCard = self.createCard()
-            tempTerm = self.createTerminal("192.168.0.{}".format(i + 100))
-            if i % 5 == 0:
-                server.registerTerminal(tempTerm.TID)
-                self.registerCard(tempCard)
+        for i in range(1, 10):
+            self.createCard()
+            self.createTerminal("localhost")
 
         server.loadTerminals()
         server.loadCards()

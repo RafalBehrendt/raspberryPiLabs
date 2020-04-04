@@ -1,24 +1,31 @@
+#!/usr/bin/env python3
+
 import Constants
 import sqlite3
 import datetime
 import csv
 from ManagementService import ManagementService
+import paho.mqtt.client as mqtt
+import tkinter
+from menu import Menu
 
 class Server:
-    address = "192.168.0.2"
-    ID = "1"
+    broker = "localhost"
     conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
     c = conn.cursor()
     listOfTerminals = []
     listOfCards = []
     checkedInEmployees = []
 
+    client = mqtt.Client()
+    menu = Menu()
+
     def __init__(self):
         self.loadTerminals()
         self.loadCards()
 
-    def retrieveData(self, TID, CID):
-        print("Retrieved card {} from terminal {}".format(CID, TID))
+    def receiveData(self, TID, CID):
+        print("Received card {} from terminal {}".format(CID, TID))
         if self.listOfTerminals.__contains__(TID):
             self.c.execute("SELECT * FROM cards WHERE CID='{}' AND isRegistered = 1".format(CID))
             cardQuery = self.c.fetchone()
@@ -153,6 +160,30 @@ class Server:
         minutes = divmod(hours[1], 60)
         seconds = divmod(minutes[1], 1)
         return(hours[0], minutes[0], seconds[0])
+
+    def processMessage(self, client, userdata, message):
+        decodedMessage = (str(message.payload.decode("utf-8"))).split(".")
+
+        if decodedMessage[0] != Constants.CLIENT_CONN and decodedMessage[0] != Constants.CLIENT_DISCONN:
+            self.receiveData(decodedMessage[0], decodedMessage[1])
+        else:
+            print(decodedMessage[0] + " : " + decodedMessage[1])
+
+    def connectToBroker(self):
+        self.client.connect(self.broker)
+        self.client.on_message = self.processMessage
+        self.client.loop_start()
+        self.client.subscribe("CID/TID")
+
+    def disconnectFromBroker(self):
+        self.client.loop_stop()
+        self.client.disconnect()
+
+
+
+
+
+
 
 
 
