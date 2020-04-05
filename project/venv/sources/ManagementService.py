@@ -30,9 +30,14 @@ class ManagementService:
         self.conn.commit()
         return Terminal(generatedUUID, address)
 
-    def createTerminal(self, address, TID):
-        self.c.execute("INSERT INTO terminals VALUES ('{}', '{}', '0')".format(TID, address))
-        self.conn.commit()
+    def createTerminalWithTID(self, address, TID):
+        self.c.execute("SELECT * FROM terminals WHERE TID='{}'".format(TID))
+        terminal = self.c.fetchone()
+        if terminal is None:
+            self.c.execute("INSERT INTO terminals VALUES ('{}', '{}', '0')".format(TID, address))
+            self.conn.commit()
+            return True
+        return False
 
     def getAllEmployees(self):
         self.c.execute("SELECT * FROM employees")
@@ -107,6 +112,14 @@ class ManagementService:
             listOfCards.append(card[0])
         return Employee(employee[0], employee[1], employee[2], listOfCards)
 
+    def getTerminalById(self, TID):
+        self.c.execute("SELECT * FROM terminals WHERE TID='{}'".format(TID))
+        terminal = self.c.fetchone()
+        if terminal is None:
+            print("There is no such terminal")
+            return None
+        return Terminal(terminal[0], terminal[1])
+
     def dropDB(self):
         res = ""
         while res != "N" or res != "Y":
@@ -129,8 +142,13 @@ class ManagementService:
 
         for i in range(1, 10):
             self.createCard()
-            self.createTerminal("localhost")
+            tmp = self.createTerminal("localhost")
+
+        server.registerTerminal(tmp.TID)
 
         server.loadTerminals()
         server.loadCards()
+
+    def dissconectFromDB(self):
+        self.conn.close()
 

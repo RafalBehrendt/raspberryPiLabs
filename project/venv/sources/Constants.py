@@ -6,6 +6,6 @@ class Action(object):
 
 TERMINAL_NOT_REGISTERED = "Terminal not registered on server"
 NO_BINDED_CARD = "User has no card binded"
-CARD_NOT_BINDED = "Provided card is not binded"
+CARD_NOT_BOUND = "Provided card is not binded"
 CLIENT_CONN = "Client connected"
 CLIENT_DISCONN = "Client disconnected"

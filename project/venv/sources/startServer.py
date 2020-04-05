@@ -4,8 +4,8 @@ from serverGuiManager import serverGuiManager
 
 def runServer():
 
-    gui = serverGuiManager(server)
-    server.connectToBroker()
+    gui = serverGuiManager()
+    #server.connectToBroker()
     gui.createMainWindow()
     gui.window.mainloop()
 

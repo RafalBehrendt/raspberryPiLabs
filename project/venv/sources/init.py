@@ -19,15 +19,24 @@ def firstInit():
 
 def init():
 
-    terminals = ms.getAllTerminals()
     cards = ms.getAllCards()
 
-    for term in terminals:
-        listOfTerminals.append(Terminal(term[0], term[1]))
+    reloadTerminals()
 
     for card in cards:
         listOfCards.append(card[0])
 
+
+def reloadTerminals():
+
+    listOfTerminals.clear()
+    terminals = ms.getAllTerminals()
+
+    for term in terminals:
+        listOfTerminals.append(Terminal(term[0], term[1]))
+
+def disconnectFromDB():
+    ms.dissconectFromDB()
 
 
 

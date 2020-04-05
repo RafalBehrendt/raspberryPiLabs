@@ -57,3 +57,5 @@ def resetDB():
     c.execute("DROP TABLE IF EXISTS bindings")
     c.execute("DROP TABLE IF EXISTS registeredTerminals")
     initializeDB()
+
+    conn.close()
