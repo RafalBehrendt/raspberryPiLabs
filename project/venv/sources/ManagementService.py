@@ -6,58 +6,93 @@ from DBManage import *
 
 
 class ManagementService:
-    conn = sqlite3.connect('../database/company.db')
-    c = conn.cursor()
+
 
     def createEmployee(self, name, surname):
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
         generatedUUID = uuid.uuid1()
-        self.c.execute("INSERT INTO employees VALUES ('{}', '{}', '{}')".format(generatedUUID, name, surname))
-        self.conn.commit()
+        c.execute("INSERT INTO employees VALUES ('{}', '{}', '{}')".format(generatedUUID, name, surname))
+        conn.commit()
+        conn.close()
 
     def createCard(self):
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
         generatedUUID = uuid.uuid1()
-        self.c.execute("INSERT INTO cards VALUES ('{}', 0, '{}')".format(generatedUUID, None))
-        self.conn.commit()
+        c.execute("INSERT INTO cards VALUES ('{}', 0, '{}')".format(generatedUUID, None))
+        conn.commit()
+        conn.close()
         return generatedUUID
 
     def registerCard(self, CID):
-        self.c.execute("UPDATE cards SET isRegistered = 1 WHERE CID = '{}'".format(CID))
-        self.conn.commit()
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("UPDATE cards SET isRegistered = 1 WHERE CID = '{}'".format(CID))
+        conn.commit()
+        conn.close()
 
     def createTerminal(self, address):
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
         generatedUUID = uuid.uuid1()
-        self.c.execute("INSERT INTO terminals VALUES ('{}', '{}', '0')".format(generatedUUID, address))
-        self.conn.commit()
+        c.execute("INSERT INTO terminals VALUES ('{}', '{}', '0')".format(generatedUUID, address))
+        conn.commit()
+        conn.close()
         return Terminal(generatedUUID, address)
 
     def createTerminalWithTID(self, address, TID):
-        self.c.execute("SELECT * FROM terminals WHERE TID='{}'".format(TID))
-        terminal = self.c.fetchone()
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("SELECT * FROM terminals WHERE TID='{}'".format(TID))
+        terminal = c.fetchone()
         if terminal is None:
-            self.c.execute("INSERT INTO terminals VALUES ('{}', '{}', '0')".format(TID, address))
-            self.conn.commit()
+            c.execute("INSERT INTO terminals VALUES ('{}', '{}', '0')".format(TID, address))
+            conn.commit()
+            conn.close()
             return True
+        conn.close()
         return False
 
     def getAllEmployees(self):
-        self.c.execute("SELECT * FROM employees")
-        return self.c.fetchall()
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("SELECT * FROM employees")
+        emps = c.fetchall()
+        conn.close()
+        return emps
 
     def getAllBindings(self):
-        self.c.execute("SELECT CID FROM cards WHERE EID IS NOT NULL")
-        return self.c.fetchall()
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("SELECT CID FROM cards WHERE EID IS NOT NULL")
+        binds = c.fetchall()
+        conn.close()
+        return binds
 
     def getAllCards(self):
-        self.c.execute("SELECT * FROM cards")
-        return self.c.fetchall()
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("SELECT * FROM cards")
+        cards = c.fetchall()
+        conn.close()
+        return cards
 
     def getAllTerminals(self):
-        self.c.execute("SELECT * FROM terminals")
-        return self.c.fetchall()
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("SELECT * FROM terminals")
+        terms = c.fetchall()
+        conn.close()
+        return terms
 
     def getLogs(self):
-        self.c.execute("SELECT * FROM logs")
-        return self.c.fetchall()
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("SELECT * FROM logs")
+        logs = c.fetchall()
+        conn.close()
+        return logs
 
     def printLogs(self):
         logs = self.getLogs()
@@ -94,30 +129,44 @@ class ManagementService:
         inc = 0
 
     def deleteEmployee(self, EID):
-        self.c.execute("DELETE FROM employees WHERE EID = '{}'".format(EID))
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("DELETE FROM employees WHERE EID = '{}'".format(EID))
+        conn.close()
 
     def deleteCard(self, CID):
-        self.c.execute("DELETE FROM cards WHERE CID = '{}'".format(CID))
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("DELETE FROM cards WHERE CID = '{}'".format(CID))
+        conn.close()
 
     def getEmployeeById(self, EID):
-        self.c.execute("SELECT * FROM employees WHERE EID='{}'".format(EID))
-        employee = self.c.fetchone()
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("SELECT * FROM employees WHERE EID='{}'".format(EID))
+        employee = c.fetchone()
         if employee is None:
             print("There is no such employee")
+            conn.close()
             return
-        self.c.execute("SELECT CID FROM cards WHERE EID='{}'".format(EID))
-        cards = self.c.fetchall()
+        c.execute("SELECT CID FROM cards WHERE EID='{}'".format(EID))
+        cards = c.fetchall()
         listOfCards = []
         for card in cards:
             listOfCards.append(card[0])
+        conn.close()
         return Employee(employee[0], employee[1], employee[2], listOfCards)
 
     def getTerminalById(self, TID):
-        self.c.execute("SELECT * FROM terminals WHERE TID='{}'".format(TID))
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute("SELECT * FROM terminals WHERE TID='{}'".format(TID))
         terminal = self.c.fetchone()
         if terminal is None:
             print("There is no such terminal")
+            conn.close()
             return None
+        conn.close()
         return Terminal(terminal[0], terminal[1])
 
     def dropDB(self):
@@ -148,7 +197,3 @@ class ManagementService:
 
         server.loadTerminals()
         server.loadCards()
-
-    def dissconectFromDB(self):
-        self.conn.close()
-

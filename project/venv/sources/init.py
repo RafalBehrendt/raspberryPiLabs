@@ -34,14 +34,3 @@ def reloadTerminals():
 
     for term in terminals:
         listOfTerminals.append(Terminal(term[0], term[1]))
-
-def disconnectFromDB():
-    ms.dissconectFromDB()
-
-
-
-
-
-
-
-

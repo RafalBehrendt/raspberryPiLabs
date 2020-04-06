@@ -12,7 +12,7 @@ class TerminalGuiManager:
         self.window = tkinter.Tk()
 
     def createMainWindow(self):
-        self.window.geometry("300x200")
+        #self.window.geometry("300x200")
         self.window.title("TERMINAL")
         self.introLabel = tkinter.Label(self.window, text="Terminal ID: {}".format(self.terminal.TID))
         self.introLabel.grid(row=0, columnspan=5)

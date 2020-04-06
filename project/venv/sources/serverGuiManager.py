@@ -25,7 +25,7 @@ class serverGuiManager:
         server.client.subscribe("CID/TID")
 
     def createMainWindow(self):
-        self.window.geometry("300x200")
+        #self.window.geometry("1000x300")
         self.window.title("SERVER")
         self.introLabel = tkinter.Label(self.window, text="Server listening to MQTT")
         self.introLabel.grid(row=0, column=0)
@@ -76,14 +76,23 @@ class serverGuiManager:
         self.cardList.grid(row=5, column=3)
         self.employeeList.grid(row=5, column=4)
 
+        unbindButton = tkinter.Button(self.window, text="Unbind",
+                                      command=lambda: self.unbindCard(self.cardList.get()))
+
+        unbindButton.grid(row=6, column=2)
+
         generateReportLabel = tkinter.Label(self.window, text="Generate report:")
         generateReportButton = tkinter.Button(self.window, text="Generate",
                                               command=lambda: self.generateReport(self.employeeList.get()))
-        generateReportLabel.grid(row=6, column=2)
-        generateReportButton.grid(row=6, column=3)
+        generateReportLabel.grid(row=7, column=2)
+        generateReportButton.grid(row=7, column=3)
+
+        showLogsButton = tkinter.Button(self.window, text="Show logs",
+                                       command=lambda: self.showLogs())
+        showLogsButton.grid(row=8, column=2, columnspan=2)
 
         self.messageLabel = tkinter.Label(self.window, text="Hello")
-        self.messageLabel.grid(row=7, column=2, columnspan=3, pady=5)
+        self.messageLabel.grid(row=9, column=2, columnspan=999, pady=5)
 
     def registerNewTerminal(self, newTID):
         if newTID == "":
@@ -129,9 +138,40 @@ class serverGuiManager:
         else:
             self.log("Card already binded to some employee", "yellow")
 
+    def unbindCard(self, CID):
+        self.log(server.unbindCardFromEmployee(CID), "green")
+
     def generateReport(self, EID):
         server.generateReport(EID)
         self.log("Generated report for employee {}".format(EID), "green")
+
+    def showLogs(self):
+        logEntries = ms.getLogs()
+        cells = []
+        printLogWindow = tkinter.Tk()
+
+        logHeaders = []
+
+        logHeaders.append(tkinter.Label(printLogWindow, text="CardID"))
+        logHeaders.append(tkinter.Label(printLogWindow, text="TerminalID"))
+        logHeaders.append(tkinter.Label(printLogWindow, text="EmployeeID"))
+        logHeaders.append(tkinter.Label(printLogWindow, text="Action"))
+        logHeaders.append(tkinter.Label(printLogWindow, text="Date"))
+
+        i=0
+        for logHeader in logHeaders:
+            logHeader.grid(row=0, column=i)
+            i+=1
+
+        i=1
+        for log in logEntries:
+            j=0
+            for cell in log:
+                cells.append(tkinter.Label(printLogWindow, text=cell))
+                cells[-1].grid(row=i, column=j)
+                j+=1
+            i+=1
+
 
     def writeDownNewTerminal(self, terminal):
         self.terminalsStatus.append("OFFLINE")
@@ -156,13 +196,25 @@ class serverGuiManager:
 
         if decodedMessage[0] == Constants.CLIENT_CONN:
             print(decodedMessage[0] + " : " + decodedMessage[1])
-            self.log("Connected!", "green")
+            self.setTerminalOnline(decodedMessage[1])
         elif decodedMessage[0] == Constants.CLIENT_DISCONN:
-            self.log("Disconnected!", "red")
             print(decodedMessage[0] + " : " + decodedMessage[1])
+            self.setTerminalOffline(decodedMessage[1])
         else:
+            self.setTerminalOnline(decodedMessage[1])
             returnedVal=server.receiveData(decodedMessage[1], decodedMessage[0])
-            print(returnedVal)
             self.log(returnedVal, "yellow")
-            print("executed3!")
 
+    def setTerminalOnline(self, TID):
+        i = 0
+        for terminal in self.terminalsLabels:
+            if terminal.cget("text") == TID:
+                self.statusLabels[i].config(text="ONLINE", fg="green")
+            i += 1
+
+    def setTerminalOffline(self, TID):
+        i = 0
+        for terminal in self.terminalsLabels:
+            if terminal.cget("text") == TID:
+                self.statusLabels[i].config(text="OFFLINE", fg="red")
+            i += 1

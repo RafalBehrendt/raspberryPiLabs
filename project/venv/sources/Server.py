@@ -20,6 +20,7 @@ class Server:
     def __init__(self):
         self.loadTerminals()
         self.loadCards()
+        self.loadCheckedInEmployees()
 
     def receiveData(self, TID, CID):
         conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
@@ -41,15 +42,14 @@ class Server:
                         retVal="Checking employee {} in".format(employee[0])
                         print(retVal)
                         self.checkIn(CID, TID, employee[0])
-                        self.checkedInEmployees.append(employee[0])
                         return retVal
                 else:
-                    retVal = Constants.CARD_NOT_BOUND
+                    retVal = "Scanned unbound card {}".format(CID)
                     print(retVal)
                     self.logUnboundCardScan(CID, TID)
                     return retVal
             else:
-                retVal="Registering new card"
+                retVal="Registering new card {}".format(CID)
                 print(retVal)
                 self.registerUnknownCard(CID, TID)
                 return retVal
@@ -59,7 +59,7 @@ class Server:
 
 
     def loadTerminals(self):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         self.listOfTerminals.clear()
         c.execute("SELECT TID FROM terminals WHERE isRegistered = '1'")
@@ -70,7 +70,7 @@ class Server:
         conn.close()
 
     def loadCards(self):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         self.listOfCards.clear()
         c.execute("SELECT CID FROM cards WHERE isRegistered = 1")
@@ -80,8 +80,13 @@ class Server:
         print("Loaded cards")
         conn.close()
 
+    def loadCheckedInEmployees(self):
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        self
+
     def registerTerminal(self, TID):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("UPDATE terminals SET isRegistered = '1' WHERE TID = '{}'".format(TID))
         conn.commit()
@@ -90,7 +95,7 @@ class Server:
 
 
     def unregisterTerminal(self, TID):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("UPDATE terminals SET isRegistered = '0' WHERE TID = '{}'".format(TID))
         conn.commit()
@@ -98,22 +103,23 @@ class Server:
         conn.close()
 
     def getEmployeeById(self, EID):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("SELECT * FROM employees WHERE ID='{}'".format(EID))
         conn.commit()
         conn.close()
 
     def checkIn(self, CID, TID, EID):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("INSERT INTO logs VALUES ('{}', '{}', '{}', '{}', '{}')"
                         .format(CID, TID, EID, Constants.Action.checkIn, datetime.datetime.now()))
+        self.checkedInEmployees.append(EID)
         conn.commit()
         conn.close()
 
     def checkOut(self, TID, CID, EID):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("INSERT INTO logs VALUES ('{}', '{}', '{}', '{}', '{}')"
                         .format(CID, TID, EID, Constants.Action.checkOut, datetime.datetime.now()))
@@ -122,7 +128,7 @@ class Server:
         conn.close()
 
     def registerUnknownCard(self, CID, TID):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("UPDATE cards SET isRegistered = '1' WHERE CID = '{}'".format(CID))
         conn.commit()
@@ -132,15 +138,15 @@ class Server:
         self.loadCards()
 
     def logUnboundCardScan(self, CID, TID):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("INSERT INTO logs VALUES ('{}', '{}', '{}', '{}', '{}')"
-                       .format(CID, TID, None, Constants.Action.unbound, datetime.datetime.now()))
+                  .format(CID, TID, None, Constants.Action.unbound, datetime.datetime.now()))
         conn.commit()
         conn.close()
 
     def bindCardToEmployee(self, CID, EID):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("SELECT EID FROM cards WHERE CID='{}'".format(CID))
         query = c.fetchone()
@@ -156,20 +162,25 @@ class Server:
             return False
 
     def unbindCardFromEmployee(self, CID):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("SELECT EID FROM cards WHERE CID='{}'".format(CID))
         query = c.fetchone()
         if query[0] != "None":
             c.execute("UPDATE cards SET EID='{}' WHERE CID='{}'".format(None, CID))
             conn.commit()
-            print("Card unbound")
+            conn.close()
+            retVal = "Card {} unbound".format(CID)
+            print(retVal)
+            return retVal
         else:
-            print("Card {} is not bound".format(CID))
-        conn.close()
+            conn.close()
+            retVal = "Card {} is not bound".format(CID)
+            print(retVal)
+            return retVal
 
     def generateReport(self, EID):
-        conn = sqlite3.connect("../database/company.db")
+        conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("SELECT datetime FROM logs WHERE EID='{}' AND action='{}'".format(EID, Constants.Action.checkIn))
         employeeCheckIn = c.fetchall()
@@ -210,19 +221,6 @@ class Server:
         return(hours[0], minutes[0], seconds[0])
 
 
-    #def connectToBroker(self):
-     #   self.client.connect(self.broker)
-      #  self.client.on_message = serverGuiManager.processMessage
-     #   self.client.loop_start()
-    #    self.client.subscribe("CID/TID")
-
     def disconnectFromBroker(self):
         self.client.loop_stop()
         self.client.disconnect()
-
-
-    #TODO: check every functionality
-    #TODO: make all interactions appear in server terminal
-    #TODO: Offline/online labels
-
-
