@@ -1,14 +1,12 @@
 import sys
 
-
 class Menu:
     currentCard = None
     currentEmployee = None
     currentTerminal = None
-    listOfCommands = []
 
     def dropDB(self):  # drops database
-        from main import ms, server, listOfTerminals, listOfCards
+        from init import ms, server, listOfTerminals, listOfCards
         isDropped = ms.dropDB()
         if isDropped:
             ms.initDB()
@@ -21,14 +19,17 @@ class Menu:
 
     def shc(self):  # shows current card
         print(self.currentCard)
+        return self.currentCard
 
     def she(self):  # shows current employee
-        from main import ms
+        from init import ms
+        print(self.currentEmployee)
         if self.currentEmployee is not None:
             emp = ms.getEmployeeById(self.currentEmployee)
             print(emp.toString())
         else:
             print(None)
+        return emp.toString()
 
     def sht(self, ):  # shows current terminal
         if self.currentTerminal is not None:
@@ -37,45 +38,43 @@ class Menu:
             print(None)
 
     def shemps(self):  # shows all employees
-        from main import ms
+        from init import ms
         ms.printAllEmployees()
 
     def shcards(self):  # shows all cards
-        from main import ms
+        from init import ms
         ms.printCards()
 
     def shterms(self):  # shows all terminals
-        from main import ms
+        from init import ms
         ms.printAllTerminals()
 
     def shrcards(self):  # shows all registered cards
-        from main import server
+        from init import server
         for card in server.listOfCards:
             print(card)
 
     def shrterms(self):  # shows all registered terminals
-        from main import server
+        from init import server
         for term in server.listOfTerminals:
             print(term)
 
     def shLogs(self):  # shows all logs
-        from main import ms
+        from init import ms
         ms.printLogs()
 
     def chc(self, x):  # changes current card to x in list of cards
-        from main import ms
-        from main import listOfCards
+        from init import ms
+        from init import listOfCards
         if x < 0 or x >= len(listOfCards):
             print("Desired card is not available\n Available cards:")
             ms.printCards()
             return
         self.currentCard = listOfCards[x]
-        print("Changed current card to")
-
-        self.shc()
+        print("Changed current card to {}".format(self.currentCard))
 
     def che(self, x):  # changes current Employee to x in list of employees
-        from main import ms
+        from init import ms
         emps = ms.getAllEmployees()
         if x < 0 or x >= len(emps):
             print("Desired employee is not available\n Available employees:")
@@ -87,32 +86,34 @@ class Menu:
         self.she()
 
     def cht(self, x):  # changes current Terminal to x in list of terminals
-        from main import listOfTerminals
+        from init import listOfTerminals
         if x < 0 or x >= len(listOfTerminals):
             print("Desired terminal is not available\n Available terminals:")
+            i = 0
             for term in listOfTerminals:
-                print(term.toString())
+                print(i + ". " + term.toString())
+                i += 1
             return
         self.currentTerminal = listOfTerminals[x]
         print("Changed current terminal to")
         self.sht()
 
     def btu(self):  # binds current card to user
-        from main import server
+        from init import server
         if self.currentEmployee is not None and self.currentCard is not None:
             server.bindCardToEmployee(self.currentCard, self.currentEmployee)
         else:
             print("Cannot bind card {} to employee {}".format(self.currentCard, self.currentEmployee))
 
     def ubtu(self):  # unbinds current card from user
-        from main import server
+        from init import server
         if self.currentCard is not None:
             server.unbindCardFromEmployee(self.currentCard)
         else:
             print("Cannot unbind card {}".format(self.currentCard))
 
     def rt(self):  # registers current terminal on server
-        from main import server
+        from init import server
         if self.currentTerminal is not None:
             server.registerTerminal(self.currentTerminal.TID)
             print("Registered terminal")
@@ -120,7 +121,7 @@ class Menu:
             print("Current terminal is not valid")
 
     def urt(self):  # unregisters current terminal from server
-        from main import server
+        from init import server
         if self.currentTerminal is not None:
             server.unregisterTerminal(self.currentTerminal.TID)
             print("Unregistered terminal")
@@ -134,7 +135,7 @@ class Menu:
             print("Current card is not valid")
 
     def report(self):  # creates report fot current employee
-        from main import server
+        from init import server
         if self.currentEmployee is not None:
             server.generateReport(self.currentEmployee)
         else:
@@ -143,9 +144,12 @@ class Menu:
     def exit(self):  # exits app
         sys.exit()
 
-    def start(self):
-        self.chc(0)
+    def init(self):
         self.che(0)
+        self.chc(0)
+
+    def start(self):
+        self.init()
         self.cht(0)
 
         while True:
@@ -156,3 +160,6 @@ class Menu:
                 sys.exit()
             except:
                 print("Unknown command")
+
+
+
