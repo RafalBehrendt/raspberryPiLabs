@@ -1,8 +1,7 @@
 import tkinter
 from init import listOfTerminals, listOfCards, ms, reloadTerminals, server
 import Constants
-import sqlite3
-import pdb
+
 
 class serverGuiManager:
     introLabel = None
@@ -25,7 +24,7 @@ class serverGuiManager:
         server.client.subscribe("CID/TID")
 
     def createMainWindow(self):
-        #self.window.geometry("1000x300")
+        # self.window.geometry("1000x300")
         self.window.title("SERVER")
         self.introLabel = tkinter.Label(self.window, text="Server listening to MQTT")
         self.introLabel.grid(row=0, column=0)
@@ -53,7 +52,8 @@ class serverGuiManager:
         unregisterExistingTerminalLabel = tkinter.Label(self.window, text="Unegister terminal: ")
         self.registeredTerminalsList = tkinter.Spinbox(self.window, values=server.listOfTerminals)
         unregisterExistingTerminalButton = tkinter.Button(self.window, text="Unregister",
-                                                          command=lambda: self.unregisterTerminal(self.registeredTerminalsList.get()))
+                                                          command=lambda: self.unregisterTerminal(
+                                                              self.registeredTerminalsList.get()))
         unregisterExistingTerminalLabel.grid(row=3, column=2)
         self.registeredTerminalsList.grid(row=3, column=3)
         unregisterExistingTerminalButton.grid(row=3, column=4)
@@ -66,11 +66,11 @@ class serverGuiManager:
         bindCardLabel[1].grid(row=4, column=3)
         bindCardLabel[2].grid(row=4, column=4)
 
-
         self.cardList = tkinter.Spinbox(self.window, values=listOfCards)
         self.employeeList = tkinter.Spinbox(self.window, values=list(map(lambda x: x[0], ms.getAllEmployees())))
         bindButton = tkinter.Button(self.window, text="Bind",
-                                    command=lambda: self.bindCardToEmployee(self.cardList.get(), self.employeeList.get()))
+                                    command=lambda: self.bindCardToEmployee(self.cardList.get(),
+                                                                            self.employeeList.get()))
 
         bindButton.grid(row=5, column=2)
         self.cardList.grid(row=5, column=3)
@@ -88,7 +88,7 @@ class serverGuiManager:
         generateReportButton.grid(row=7, column=3)
 
         showLogsButton = tkinter.Button(self.window, text="Show logs",
-                                       command=lambda: self.showLogs())
+                                        command=lambda: self.showLogs())
         showLogsButton.grid(row=8, column=2, columnspan=2)
 
         self.messageLabel = tkinter.Label(self.window, text="Hello")
@@ -116,7 +116,6 @@ class serverGuiManager:
             self.registeredTerminalsList.config(value=server.listOfTerminals)
             self.writeDownNewTerminal(TID)
             self.log("Terminal registered", "green")
-
 
     def unregisterTerminal(self, TID):
         server.unregisterTerminal(TID)
@@ -158,20 +157,19 @@ class serverGuiManager:
         logHeaders.append(tkinter.Label(printLogWindow, text="Action"))
         logHeaders.append(tkinter.Label(printLogWindow, text="Date"))
 
-        i=0
+        i = 0
         for logHeader in logHeaders:
             logHeader.grid(row=0, column=i)
-            i+=1
+            i += 1
 
-        i=1
+        i = 1
         for log in logEntries:
-            j=0
+            j = 0
             for cell in log:
                 cells.append(tkinter.Label(printLogWindow, text=cell))
                 cells[-1].grid(row=i, column=j)
-                j+=1
-            i+=1
-
+                j += 1
+            i += 1
 
     def writeDownNewTerminal(self, terminal):
         self.terminalsStatus.append("OFFLINE")
@@ -184,9 +182,9 @@ class serverGuiManager:
         i = 0
         for terminal in self.terminalsLabels:
             print(terminal)
-            terminal.grid(row=i+1, column=0)
-            self.statusLabels[i].grid(row=i+1, column=1)
-            i+=1
+            terminal.grid(row=i + 1, column=0)
+            self.statusLabels[i].grid(row=i + 1, column=1)
+            i += 1
 
     def log(self, message, color):
         self.messageLabel.config(text=message, fg=color)
@@ -202,7 +200,7 @@ class serverGuiManager:
             self.setTerminalOffline(decodedMessage[1])
         else:
             self.setTerminalOnline(decodedMessage[1])
-            returnedVal=server.receiveData(decodedMessage[1], decodedMessage[0])
+            returnedVal = server.receiveData(decodedMessage[1], decodedMessage[0])
             self.log(returnedVal, "yellow")
 
     def setTerminalOnline(self, TID):

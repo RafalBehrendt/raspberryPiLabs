@@ -1,13 +1,10 @@
-#!/usr/bin/env python3
-
 import Constants
 import sqlite3
 import datetime
 import csv
 from ManagementService import ManagementService
 import paho.mqtt.client as mqtt
-import pdb
-#from serverGuiManager import serverGuiManager
+
 
 class Server:
     broker = "localhost"
@@ -34,12 +31,12 @@ class Server:
                 employee = c.fetchone()
                 if employee[0] != "None":
                     if self.checkedInEmployees.__contains__(employee[0]):
-                        retVal="Checking employee {} out".format(employee[0])
+                        retVal = "Checking employee {} out".format(employee[0])
                         print(retVal)
                         self.checkOut(TID, CID, employee[0])
                         return retVal
                     else:
-                        retVal="Checking employee {} in".format(employee[0])
+                        retVal = "Checking employee {} in".format(employee[0])
                         print(retVal)
                         self.checkIn(CID, TID, employee[0])
                         return retVal
@@ -49,14 +46,13 @@ class Server:
                     self.logUnboundCardScan(CID, TID)
                     return retVal
             else:
-                retVal="Registering new card {}".format(CID)
+                retVal = "Registering new card {}".format(CID)
                 print(retVal)
                 self.registerUnknownCard(CID, TID)
                 return retVal
         else:
             print(Constants.TERMINAL_NOT_REGISTERED)
             return Constants.TERMINAL_NOT_REGISTERED
-
 
     def loadTerminals(self):
         conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
@@ -93,7 +89,6 @@ class Server:
         self.loadTerminals()
         conn.close()
 
-
     def unregisterTerminal(self, TID):
         conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
@@ -113,7 +108,7 @@ class Server:
         conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("INSERT INTO logs VALUES ('{}', '{}', '{}', '{}', '{}')"
-                        .format(CID, TID, EID, Constants.Action.checkIn, datetime.datetime.now()))
+                  .format(CID, TID, EID, Constants.Action.checkIn, datetime.datetime.now()))
         self.checkedInEmployees.append(EID)
         conn.commit()
         conn.close()
@@ -122,7 +117,7 @@ class Server:
         conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute("INSERT INTO logs VALUES ('{}', '{}', '{}', '{}', '{}')"
-                        .format(CID, TID, EID, Constants.Action.checkOut, datetime.datetime.now()))
+                  .format(CID, TID, EID, Constants.Action.checkOut, datetime.datetime.now()))
         conn.commit()
         self.checkedInEmployees.remove(EID)
         conn.close()
@@ -133,7 +128,7 @@ class Server:
         c.execute("UPDATE cards SET isRegistered = '1' WHERE CID = '{}'".format(CID))
         conn.commit()
         c.execute("INSERT INTO logs VALUES ('{}', '{}', '{}', '{}', '{}')"
-                       .format(CID, TID, None, Constants.Action.unknown, datetime.datetime.now()))
+                  .format(CID, TID, None, Constants.Action.unknown, datetime.datetime.now()))
         conn.commit()
         self.loadCards()
 
@@ -192,8 +187,9 @@ class Server:
             writer = csv.writer(csvflie)
             writer.writerow([employee.ID, employee.name, employee.surname])
             writer.writerow([])
-            writer.writerow(["Time of checking in", "Time of checking out", "Total hours", "Total minutes", "Total seconds"])
-            totalTime=0
+            writer.writerow(
+                ["Time of checking in", "Time of checking out", "Total hours", "Total minutes", "Total seconds"])
+            totalTime = 0
             for (checkIn, checkOut) in zip(employeeCheckIn, employeeCheckOut):
                 diffrence = checkOut[0] - checkIn[0]
                 durInSec = diffrence.total_seconds()
@@ -209,7 +205,7 @@ class Server:
                 totalTime += durInSec
             time = self.convertSecondsToTime(totalTime)
             writer.writerow([])
-            writer.writerow(["","Hours","Minutes","Seconds"])
+            writer.writerow(["", "Hours", "Minutes", "Seconds"])
             writer.writerow(["Total time of work:", int(time[0]), int(time[1]), int(time[2])])
         print("Created report {} in reports folder".format(EID))
         conn.close()
@@ -218,8 +214,7 @@ class Server:
         hours = divmod(totalSeconds, 3600)
         minutes = divmod(hours[1], 60)
         seconds = divmod(minutes[1], 1)
-        return(hours[0], minutes[0], seconds[0])
-
+        return (hours[0], minutes[0], seconds[0])
 
     def disconnectFromBroker(self):
         self.client.loop_stop()

@@ -23,7 +23,6 @@ class Menu:
 
     def she(self):  # shows current employee
         from init import ms
-        print(self.currentEmployee)
         if self.currentEmployee is not None:
             emp = ms.getEmployeeById(self.currentEmployee)
             print(emp.toString())
@@ -160,6 +159,3 @@ class Menu:
                 sys.exit()
             except:
                 print("Unknown command")
-
-
-

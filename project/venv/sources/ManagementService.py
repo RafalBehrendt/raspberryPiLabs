@@ -1,12 +1,10 @@
 import uuid
-import sqlite3
 from Employee import Employee
 from Terminal import Terminal
 from DBManage import *
 
 
 class ManagementService:
-
 
     def createEmployee(self, name, surname):
         conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
