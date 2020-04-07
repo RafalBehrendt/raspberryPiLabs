@@ -9,6 +9,7 @@ ms = ManagementService()
 listOfTerminals = []
 listOfCards = []
 
+
 def firstInit():
     DBManage.resetDB()
     DBManage.initializeDB()
@@ -17,8 +18,8 @@ def firstInit():
     server.loadCards()
     print("First init successful!")
 
-def init():
 
+def init():
     cards = ms.getAllCards()
 
     reloadTerminals()
@@ -28,7 +29,6 @@ def init():
 
 
 def reloadTerminals():
-
     listOfTerminals.clear()
     terminals = ms.getAllTerminals()
 

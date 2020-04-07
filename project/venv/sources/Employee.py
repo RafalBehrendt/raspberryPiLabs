@@ -3,12 +3,12 @@ import uuid
 
 class Employee:
 
-    def __init__(self, ID, name, surname, bindedCards):
+    def __init__(self, ID, name, surname, boundCards):
         self.ID = ID
         self.name = name
         self.surname = surname
-        self.bindedCards = bindedCards
+        self.boundCards = boundCards
 
     def toString(self):
         return ("EID: {}\nName: {}\nSurname: {}\nbindedCards: {}"
-                .format(self.ID, self.name, self.surname, self.bindedCards))
+                .format(self.ID, self.name, self.surname, self.boundCards))

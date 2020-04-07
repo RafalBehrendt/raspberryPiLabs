@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import paho.mqtt.client as mqtt
 import Constants
 
@@ -7,7 +5,7 @@ class Terminal:
 
     def __init__(self, TID, broker):
         self.TID = TID
-        self.broker = broker #localhost
+        self.broker = broker  # localhost
 
         self.client = mqtt.Client()
 
@@ -15,7 +13,7 @@ class Terminal:
         server.receiveData(self.TID, CID)
 
     def scanCard(self, CID):
-        from main import server
+        from init import server
         print("Scanned card: {}".format(CID))
         self.sendData(CID, server)
 
@@ -33,5 +31,3 @@ class Terminal:
     def disconnectFromBroker(self):
         self.scanCardMQTT(Constants.CLIENT_DISCONN)
         self.client.disconnect()
-
-
