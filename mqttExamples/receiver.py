@@ -6,9 +6,10 @@ import sqlite3
 import time
 
 # The broker name or IP address.
-broker = "localhost"
-# broker = "127.0.0.1"
-# broker = "10.0.0.1"
+#broker = "localhost"
+broker = "rav"
+port = 8883
+
 
 # The MQTT client.
 client = mqtt.Client()
@@ -72,8 +73,10 @@ def create_main_window():
 
 
 def connect_to_broker():
+    #Setting TLS
+    client.tls_set("ca.crt")
     # Connect to the broker.
-    client.connect(broker)
+    client.connect(broker, port)
     # Send message about conenction.
     client.on_message = process_message
     # Starts client and subscribe.
