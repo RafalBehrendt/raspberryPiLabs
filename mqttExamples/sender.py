@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from tkinter import messagebox
 
 import paho.mqtt.client as mqtt
 import tkinter
@@ -6,12 +7,10 @@ import tkinter
 # The terminal ID - can be any string.
 terminal_id = "T0"
 # The broker name or IP address.
-#broker = "localhost"
+# broker = "localhost"
 broker = "rav"
-#TLS port
+# TLS port
 port = 8883
-
-
 
 # The MQTT client.
 client = mqtt.Client()
@@ -19,8 +18,9 @@ client = mqtt.Client()
 # Thw main window with buttons to simulate the RFID card usage.
 window = tkinter.Tk()
 
+
 def call_worker(worker_name):
-    client.publish("worker/name", worker_name + "." + terminal_id,)
+    client.publish("worker/name", worker_name + "." + terminal_id)
 
 
 def create_main_window():
@@ -53,11 +53,18 @@ def create_main_window():
 
 
 def connect_to_broker():
-    #Setting TLS
+    # Setting TLS
     client.tls_set("ca.crt")
+    # Authenticate
+    client.username_pw_set(username='client', password='password')
     # Connect to the broker.
+
     client.connect(broker, port)
     # Send message about conenction.
+    client.on_message = process_message
+    # Starts client and subscribe.
+    client.loop_start()
+    client.subscribe("server/name")
     call_worker("Client connected")
 
 
@@ -76,6 +83,11 @@ def run_sender():
     window.mainloop()
 
     disconnect_from_broker()
+
+
+def process_message(client, userdata, message):
+    message_decoded = str(message.payload.decode("utf-8"))
+    messagebox.showinfo("Message from the Server", message_decoded)
 
 
 if __name__ == "__main__":

@@ -6,16 +6,16 @@ import sqlite3
 import time
 
 # The broker name or IP address.
-#broker = "localhost"
+# broker = "localhost"
 broker = "rav"
 port = 8883
-
 
 # The MQTT client.
 client = mqtt.Client()
 
 # Thw main window.
 window = tkinter.Tk()
+
 
 def process_message(client, userdata, message):
     # Decode message.
@@ -47,7 +47,7 @@ def print_log_to_window():
 
     for log_entry in log_entrys:
         labels_log_entry.append(tkinter.Label(print_log_window, text=(
-            "On %s, %s used the terminal %s" % (log_entry[0], log_entry[1], log_entry[2]))))
+                "On %s, %s used the terminal %s" % (log_entry[0], log_entry[1], log_entry[2]))))
 
     for label in labels_log_entry:
         label.pack(side="top")
@@ -64,17 +64,27 @@ def create_main_window():
     window.title("RECEIVER")
     label = tkinter.Label(window, text="Listening to the MQTT")
     exit_button = tkinter.Button(window, text="Stop", command=window.quit)
+    hello_button = tkinter.Button(
+        window, text="Hello from the server", command=sendMessageToClient)
     print_log_button = tkinter.Button(
         window, text="Print log", command=print_log_to_window)
 
     label.pack()
+    hello_button.pack(side="right")
     exit_button.pack(side="right")
     print_log_button.pack(side="right")
 
 
+def sendMessageToClient():
+    client.publish("server/name", "Hello from the server")
+
+
+
 def connect_to_broker():
-    #Setting TLS
+    # Setting TLS
     client.tls_set("ca.crt")
+    # Authenticate
+    client.username_pw_set(username='client', password='password')
     # Connect to the broker.
     client.connect(broker, port)
     # Send message about conenction.
