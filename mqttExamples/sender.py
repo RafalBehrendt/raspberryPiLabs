@@ -64,7 +64,7 @@ def connect_to_broker():
     client.on_message = process_message
     # Starts client and subscribe.
     client.loop_start()
-    client.subscribe("server/name")
+    client.subscribe("server/namae")
     call_worker("Client connected")
 
 

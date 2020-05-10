@@ -1,8 +1,8 @@
 import sqlite3
-
+from Constants import DATABASE_PATH
 
 def initializeDB():
-    conn = sqlite3.connect('../database/company.db')
+    conn = sqlite3.connect(DATABASE_PATH)
 
     c = conn.cursor()
 

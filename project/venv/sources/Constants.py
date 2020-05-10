@@ -10,3 +10,6 @@ NO_CARD_BOUND = "User has no card bound"
 CARD_NOT_BOUND = "Provided card is not bound"
 CLIENT_CONN = "Client connected"
 CLIENT_DISCONN = "Client disconnected"
+
+DATABASE_PATH = "../database/company.db"
+CERT_PATH = "../certs/ca.crt"

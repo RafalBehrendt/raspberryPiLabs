@@ -29,3 +29,6 @@ class TerminalGuiManager:
     def scanCard(self, card):
         self.terminal.scanCardMQTT(card)
         print("Scanned card: {}".format(card))
+
+    def quit(self):
+        self.window.quit()

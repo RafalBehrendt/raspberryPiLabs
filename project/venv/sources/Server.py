@@ -7,7 +7,8 @@ import paho.mqtt.client as mqtt
 
 
 class Server:
-    broker = "localhost"
+    broker = "rav"
+    port = 8883
     listOfTerminals = []
     listOfCards = []
     checkedInEmployees = []
@@ -18,6 +19,9 @@ class Server:
         self.loadTerminals()
         self.loadCards()
         self.loadCheckedInEmployees()
+
+    def setGui(self, gui):
+        self.gui = gui
 
     def receiveData(self, TID, CID):
         conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
@@ -79,7 +83,6 @@ class Server:
     def loadCheckedInEmployees(self):
         conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
-        self
 
     def registerTerminal(self, TID):
         conn = sqlite3.connect('../database/company.db', detect_types=sqlite3.PARSE_DECLTYPES)
@@ -214,7 +217,33 @@ class Server:
         hours = divmod(totalSeconds, 3600)
         minutes = divmod(hours[1], 60)
         seconds = divmod(minutes[1], 1)
-        return (hours[0], minutes[0], seconds[0])
+        return hours[0], minutes[0], seconds[0]
+
+    def disconnectTerminal(self, TID, message):
+        self.gui.setTerminalOffline(TID)
+        self.client.publish("server/name", TID + "." + message)
+
+    def processMessage(self, client, userdata, message):
+        decodedMessage = (str(message.payload.decode("utf-8"))).split(".")
+
+        if decodedMessage[0] == Constants.CLIENT_CONN:
+            print(decodedMessage[0] + " : " + decodedMessage[1])
+            self.gui.setTerminalOnline(decodedMessage[1])
+        elif decodedMessage[0] == Constants.CLIENT_DISCONN:
+            print(decodedMessage[0] + " : " + decodedMessage[1])
+            self.gui.setTerminalOffline(decodedMessage[1])
+        else:
+            self.gui.setTerminalOnline(decodedMessage[1])
+            returnedVal = self.receiveData(decodedMessage[1], decodedMessage[0])
+            self.gui.log(returnedVal, "yellow")
+
+    def connectToBroker(self, login, password):
+        self.client.tls_set(Constants.CERT_PATH)
+        self.client.username_pw_set(username=login, password=password)
+        self.client.connect(self.broker, self.port)
+        self.client.on_message = self.processMessage
+        self.client.loop_start()
+        self.client.subscribe("CID/TID")
 
     def disconnectFromBroker(self):
         self.client.loop_stop()

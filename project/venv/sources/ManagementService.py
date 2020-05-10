@@ -189,7 +189,7 @@ class ManagementService:
 
         for i in range(1, 10):
             self.createCard()
-            tmp = self.createTerminal("localhost")
+            tmp = self.createTerminal("rav")
 
         server.registerTerminal(tmp.TID)
 

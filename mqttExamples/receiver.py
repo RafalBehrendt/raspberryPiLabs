@@ -76,7 +76,7 @@ def create_main_window():
 
 
 def sendMessageToClient():
-    client.publish("server/name", "Hello from the server")
+    client.publish("server/namae", "Hello from the server")
 
 
 

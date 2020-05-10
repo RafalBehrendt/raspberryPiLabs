@@ -1,6 +1,7 @@
 import tkinter
+from tkinter import simpledialog
+
 from init import listOfTerminals, listOfCards, ms, reloadTerminals, server
-import Constants
 
 
 class serverGuiManager:
@@ -8,6 +9,7 @@ class serverGuiManager:
     terminalsStatus = []
     terminalsLabels = []
     statusLabels = []
+    terminalDisconnectButtons = []
 
     messageLabel = None
     cardList = None
@@ -17,11 +19,6 @@ class serverGuiManager:
     def __init__(self):
         self.window = tkinter.Tk()
         self.registeredTerminalsList = tkinter.Spinbox(self.window)
-
-        server.client.connect(server.broker)
-        server.client.on_message = self.processMessage
-        server.client.loop_start()
-        server.client.subscribe("CID/TID")
 
     def createMainWindow(self):
         # self.window.geometry("1000x300")
@@ -36,35 +33,35 @@ class serverGuiManager:
         addNewTerminalEntry = tkinter.Entry(self.window, width=10)
         addNewTerminalButton = tkinter.Button(self.window, text="Register",
                                               command=lambda: self.registerNewTerminal(addNewTerminalEntry.get()))
-        addNewTerminalLabel.grid(row=1, column=2)
-        addNewTerminalEntry.grid(row=1, column=3)
-        addNewTerminalButton.grid(row=1, column=4)
+        addNewTerminalLabel.grid(row=1, column=3)
+        addNewTerminalEntry.grid(row=1, column=4)
+        addNewTerminalButton.grid(row=1, column=5)
 
         registerExistingTerminalLabel = tkinter.Label(self.window, text="Register existing terminal: ")
         self.existingTerminalsList = tkinter.Spinbox(self.window, values=list(map(lambda x: x.TID, listOfTerminals)))
         registerExistingTerminalButton = tkinter.Button(self.window, text="Register",
                                                         command=lambda: self.registerExistingTerminal(
                                                             self.existingTerminalsList.get()))
-        registerExistingTerminalLabel.grid(row=2, column=2)
-        self.existingTerminalsList.grid(row=2, column=3)
-        registerExistingTerminalButton.grid(row=2, column=4)
+        registerExistingTerminalLabel.grid(row=2, column=3)
+        self.existingTerminalsList.grid(row=2, column=4)
+        registerExistingTerminalButton.grid(row=2, column=5)
 
         unregisterExistingTerminalLabel = tkinter.Label(self.window, text="Unegister terminal: ")
         self.registeredTerminalsList = tkinter.Spinbox(self.window, values=server.listOfTerminals)
         unregisterExistingTerminalButton = tkinter.Button(self.window, text="Unregister",
                                                           command=lambda: self.unregisterTerminal(
                                                               self.registeredTerminalsList.get()))
-        unregisterExistingTerminalLabel.grid(row=3, column=2)
-        self.registeredTerminalsList.grid(row=3, column=3)
-        unregisterExistingTerminalButton.grid(row=3, column=4)
+        unregisterExistingTerminalLabel.grid(row=3, column=3)
+        self.registeredTerminalsList.grid(row=3, column=4)
+        unregisterExistingTerminalButton.grid(row=3, column=5)
 
         bindCardLabel = []
         bindCardLabel.append(tkinter.Label(self.window, text="Bind card to employee"))
         bindCardLabel.append(tkinter.Label(self.window, text="Card ID"))
         bindCardLabel.append(tkinter.Label(self.window, text="Employee Name"))
-        bindCardLabel[0].grid(row=4, column=2)
-        bindCardLabel[1].grid(row=4, column=3)
-        bindCardLabel[2].grid(row=4, column=4)
+        bindCardLabel[0].grid(row=4, column=3)
+        bindCardLabel[1].grid(row=4, column=4)
+        bindCardLabel[2].grid(row=4, column=5)
 
         self.cardList = tkinter.Spinbox(self.window, values=listOfCards)
         self.employeeList = tkinter.Spinbox(self.window, values=list(map(lambda x: x[0], ms.getAllEmployees())))
@@ -72,27 +69,27 @@ class serverGuiManager:
                                     command=lambda: self.bindCardToEmployee(self.cardList.get(),
                                                                             self.employeeList.get()))
 
-        bindButton.grid(row=5, column=2)
-        self.cardList.grid(row=5, column=3)
-        self.employeeList.grid(row=5, column=4)
+        bindButton.grid(row=5, column=3)
+        self.cardList.grid(row=5, column=4)
+        self.employeeList.grid(row=5, column=5)
 
         unbindButton = tkinter.Button(self.window, text="Unbind",
                                       command=lambda: self.unbindCard(self.cardList.get()))
 
-        unbindButton.grid(row=6, column=2)
+        unbindButton.grid(row=6, column=3)
 
         generateReportLabel = tkinter.Label(self.window, text="Generate report:")
         generateReportButton = tkinter.Button(self.window, text="Generate",
                                               command=lambda: self.generateReport(self.employeeList.get()))
-        generateReportLabel.grid(row=7, column=2)
-        generateReportButton.grid(row=7, column=3)
+        generateReportLabel.grid(row=7, column=3)
+        generateReportButton.grid(row=7, column=4)
 
         showLogsButton = tkinter.Button(self.window, text="Show logs",
                                         command=lambda: self.showLogs())
-        showLogsButton.grid(row=8, column=2, columnspan=2)
+        showLogsButton.grid(row=8, column=3, columnspan=2)
 
         self.messageLabel = tkinter.Label(self.window, text="Hello")
-        self.messageLabel.grid(row=9, column=2, columnspan=999, pady=5)
+        self.messageLabel.grid(row=9, column=3, columnspan=999, pady=5)
 
     def registerNewTerminal(self, newTID):
         if newTID == "":
@@ -175,8 +172,11 @@ class serverGuiManager:
         self.terminalsStatus.append("OFFLINE")
         self.terminalsLabels.append(tkinter.Label(self.window, text=terminal))
         self.statusLabels.append(tkinter.Label(self.window, text=self.terminalsStatus[-1], fg="red"))
+        self.terminalDisconnectButtons.append(tkinter.Button(self.window, text="Disconnect",
+                                                             command=lambda: self.disconnectTerminal(terminal)))
         self.terminalsLabels[-1].grid(row=len(self.terminalsLabels), column=0)
         self.statusLabels[-1].grid(row=len(self.terminalsLabels), column=1)
+        self.terminalDisconnectButtons[-1].grid(row=len(self.terminalsLabels), column=2)
 
     def refreshTerminals(self):
         i = 0
@@ -189,19 +189,9 @@ class serverGuiManager:
     def log(self, message, color):
         self.messageLabel.config(text=message, fg=color)
 
-    def processMessage(self, client, userdata, message):
-        decodedMessage = (str(message.payload.decode("utf-8"))).split(".")
-
-        if decodedMessage[0] == Constants.CLIENT_CONN:
-            print(decodedMessage[0] + " : " + decodedMessage[1])
-            self.setTerminalOnline(decodedMessage[1])
-        elif decodedMessage[0] == Constants.CLIENT_DISCONN:
-            print(decodedMessage[0] + " : " + decodedMessage[1])
-            self.setTerminalOffline(decodedMessage[1])
-        else:
-            self.setTerminalOnline(decodedMessage[1])
-            returnedVal = server.receiveData(decodedMessage[1], decodedMessage[0])
-            self.log(returnedVal, "yellow")
+    def disconnectTerminal(self, terminal):
+        message = simpledialog.askstring("Provide message", "Provide reason for disconnection")
+        server.disconnectTerminal(terminal, message)
 
     def setTerminalOnline(self, TID):
         i = 0
