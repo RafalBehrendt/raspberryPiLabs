@@ -123,6 +123,8 @@ class serverGuiManager:
                 self.statusLabels[i].destroy()
                 self.statusLabels.remove(self.statusLabels[i])
                 self.terminalsLabels.remove(terminal)
+                self.terminalDisconnectButtons[i].destroy()
+                self.terminalDisconnectButtons.remove(self.terminalDisconnectButtons[i])
                 terminal.destroy()
             i += 1
         self.refreshTerminals()
@@ -181,9 +183,9 @@ class serverGuiManager:
     def refreshTerminals(self):
         i = 0
         for terminal in self.terminalsLabels:
-            print(terminal)
             terminal.grid(row=i + 1, column=0)
             self.statusLabels[i].grid(row=i + 1, column=1)
+            self.terminalDisconnectButtons[i].grid(row=i + 1, column=2)
             i += 1
 
     def log(self, message, color):
@@ -191,7 +193,8 @@ class serverGuiManager:
 
     def disconnectTerminal(self, terminal):
         message = simpledialog.askstring("Provide message", "Provide reason for disconnection")
-        server.disconnectTerminal(terminal, message)
+        if message is not None:
+            server.disconnectTerminal(terminal, message)
 
     def setTerminalOnline(self, TID):
         i = 0

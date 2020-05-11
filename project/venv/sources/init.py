@@ -14,9 +14,7 @@ def firstInit():
     DBManage.resetDB()
     DBManage.initializeDB()
     ms.mockData(server)
-    server.loadTerminals()
-    server.loadCards()
-    print("First init successful!")
+    print("App reset successful")
 
 
 def init():

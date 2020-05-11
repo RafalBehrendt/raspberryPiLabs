@@ -1,5 +1,6 @@
 from tkinter import messagebox
 
+import atexit
 import paho.mqtt.client as mqtt
 import Constants
 
@@ -46,6 +47,7 @@ class Terminal:
         self.client.loop_start()
         self.client.subscribe("server/name")
         self.scanCardMQTT(Constants.CLIENT_CONN)
+        atexit.register(self.disconnectFromBroker)
 
     def disconnectFromBroker(self):
         self.scanCardMQTT(Constants.CLIENT_DISCONN)

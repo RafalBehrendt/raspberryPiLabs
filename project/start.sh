@@ -2,4 +2,4 @@
 
 cd venv/sources
 
-python3 main.py $1
+python3 resetApp.py $1
