@@ -47,7 +47,7 @@ def initializeDB():
 
 
 def resetDB():
-    conn = sqlite3.connect('../database/company.db')
+    conn = sqlite3.connect(DATABASE_PATH)
     c = conn.cursor()
 
     c.execute("DROP TABLE IF EXISTS employees")

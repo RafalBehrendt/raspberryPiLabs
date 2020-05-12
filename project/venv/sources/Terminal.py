@@ -16,14 +16,6 @@ class Terminal:
     def setGui(self, gui):
         self.terminalGui = gui
 
-    def sendData(self, CID, server):
-        server.receiveData(self.TID, CID)
-
-    def scanCard(self, CID):
-        from init import server
-        print("Scanned card: {}".format(CID))
-        self.sendData(CID, server)
-
     def toString(self):
         return "TID: {} \naddress: {}".format(self.TID, self.broker)
 
