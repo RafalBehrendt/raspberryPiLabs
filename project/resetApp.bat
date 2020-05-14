@@ -2,4 +2,4 @@
 
 cd venv/sources
 
-python main.py %1
+python resetApp.py

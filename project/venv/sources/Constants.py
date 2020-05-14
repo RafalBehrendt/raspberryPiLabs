@@ -13,3 +13,5 @@ CLIENT_DISCONN = "Client disconnected"
 
 DATABASE_PATH = "../database/company.db"
 CERT_PATH = "../certs/ca.crt"
+HOSTNAME = "rav"
+PORT_NUMBER = 8883

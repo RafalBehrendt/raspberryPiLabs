@@ -1,6 +1,7 @@
 import tkinter
 from tkinter import simpledialog
 
+import Constants
 from init import listOfTerminals, listOfCards, ms, reloadTerminals, server
 
 
@@ -95,7 +96,7 @@ class serverGuiManager:
         if newTID == "":
             self.log("Provide non empty TID", "yellow")
 
-        if not ms.createTerminalWithTID("localhost", newTID):
+        if not ms.createTerminalWithTID(Constants.HOSTNAME, newTID):
             self.log("TID not unique. Provide unique ID for terminal", "red")
             return
         server.registerTerminal(newTID)
@@ -134,10 +135,10 @@ class serverGuiManager:
         if server.bindCardToEmployee(CID, EID):
             self.log("Bound card {} to employee {}".format(CID, EID), "green")
         else:
-            self.log("Card already binded to some employee", "yellow")
+            self.log("Card already bound to some employee", "yellow")
 
     def unbindCard(self, CID):
-        self.log(server.unbindCardFromEmployee(CID), "green")
+        self.log(server.unbindCardFromEmployee(CID), "yellow")
 
     def generateReport(self, EID):
         server.generateReport(EID)
@@ -147,7 +148,6 @@ class serverGuiManager:
         logEntries = ms.getLogs()
         cells = []
         printLogWindow = tkinter.Tk()
-
         logHeaders = []
 
         logHeaders.append(tkinter.Label(printLogWindow, text="CardID"))

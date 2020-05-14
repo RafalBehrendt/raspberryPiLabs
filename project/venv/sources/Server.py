@@ -7,8 +7,8 @@ import paho.mqtt.client as mqtt
 
 
 class Server:
-    broker = "rav"
-    port = 8883
+    broker = Constants.HOSTNAME
+    port = Constants.PORT_NUMBER
     listOfTerminals = []
     listOfCards = []
     checkedInEmployees = []

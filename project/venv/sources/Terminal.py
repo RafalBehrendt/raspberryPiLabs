@@ -9,7 +9,7 @@ class Terminal:
     def __init__(self, TID, broker):
         self.TID = TID
         self.broker = broker  # rav
-        self.port = 8883
+        self.port = Constants.PORT_NUMBER
 
         self.client = mqtt.Client()
 
